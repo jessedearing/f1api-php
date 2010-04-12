@@ -1,0 +1,555 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd">
+<?xml-stylesheet type="text/xsl" href="rfc2629.xslt" ?>
+<rfc category="exp" ipr="none" docName="ft_oauth_core_1_0">
+	<?rfc strict="yes" ?>
+	<?rfc toc="yes" ?>
+	<?rfc tocdepth="2" ?>
+	<?rfc symrefs="yes" ?>
+	<?rfc sortrefs="yes" ?>
+	<?rfc compact="yes" ?>
+	<?rfc subcompact="no" ?>
+	<?rfc iprnotified="no" ?>
+	<?rfc private="Implementer Draft" ?>
+	<front>
+		<title>Fellowship One REST API Auth Core v1.0 (Draft)</title>
+		<author initials="naf" surname="Fellowship One OAuth Extension" fullname="Fellowship One API Group">
+			<organization/>
+			<address>
+				<email>api@fellowshipone.com</email>
+			</address>
+		</author>
+		<date year="2009" month="June"/>
+		<abstract>
+			<t>
+			This Authentication protocol is an extension of the OAuth 1.0 protocol which enables websites or applications (Consumers) 
+			to access Protected Resources from a web service (Service Provider) via an API, without requiring Users to disclose their 
+			Service Provider credentials to the Consumers. More generally, OAuth creates a freely-implementable and generic 
+			methodology for API authentication.
+		  </t>
+			<t>
+				This extension’s intent is to provide a pattern that will support the usage concepts of Trusted Consumer applications, 
+				Multi-Tenant / multi-Users with multi-personas.  As well as provide a token based trust for consumer applications that 
+				have a preexisting trust established (i.e. the consumer is a tenant of the service provider and the consumer’s users have 
+				established a trust with the service provide via the consumer). 
+		  </t>
+		  <t>
+			  This enables the usage of many security measures from the OAuth Protocol while allowing the applications written by those parties accept credentials directly.
+			   Since the user already "trusts" the Consumer / Organization who wrote the application encoding and accepting credentials directly 
+			   ensures seemless integration.
+		  </t>
+		</abstract>
+	</front>
+	<middle>
+		<section title="Authors">
+			<t>
+				<list style="empty">
+					<t>Jas Singh (jsingh@fellowshiptech.com)</t>
+					<t>Kingsley Allen (kallen@fellowshiptech.com)</t>	
+					<t>Matt Vasquez (mvasquez@fellowshiptech.com)</t>
+					<t>Nick Floyd (nfloyd@fellowshiptech.com), Editor</t>
+					<t>Tim Hardy (thardy@fellowshiptech.com)</t>
+				</list>
+			</t>
+		</section>
+		<section title="Notation and Conventions">
+			<t>
+        The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+        "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+        document are to be interpreted as described in <xref target="RFC2119"/>.
+        Domain name examples use <xref target="RFC2606"/>.
+      </t>
+			<t>
+		  OAuth Core 1.0 references and definitions can be viewed : http://oauth.net/core/1.0/
+      </t>
+		</section>
+		<section title="Definitions">
+			<t>
+				<list style="hanging">
+					<t hangText="1st Party Consumer Applications:">
+							Applications written and made public by the Service Provider (Fellowship Technologies) – They will be marked as Public and as Trusted by the Service Provider.
+						</t>
+					<t hangText="2nd Party User Trusted Consumer Applications:">
+						applications written and made private by the Consumer and used by the Consumer’s(or Tenant’s) Users – They will be marked as Private by the Service Provider.
+					  </t>
+					<t hangText="3rd Party Consumer Applications:">
+						Defined as applications written and made public for consumption across Tenants – They will be marked as Public by the Service Provider.
+					  </t>
+					<t hangText="*Service Provider:">
+						A web application that allows access via OAuth.
+					  </t>
+					<t hangText="Tenant:">
+						An entity / organization that encapsulates a group of Users with in the context of the Service Provider.
+					  </t>
+					<t hangText="User:">
+					   A persona of the User for the given Consumer Application implementation - An individual who has an account with the Service Provider.
+					  </t>
+					<t hangText="User Type:">
+					   A persona of the User for the given Consumer Application implementation - Based on personas established by the Service Provider.
+					  </t>
+					<t hangText="Consumer:">
+						3rd party / Tenant - A website or application that uses OAuth to access the Service Provider on behalf of the User. 
+					  </t>
+					<t hangText="Trusted Consumer:">
+						A Consumer where the User has implicit trust because the Consumer is both a Tenant / User of the Service Provider and the User's organization. 
+					  </t>
+					<t hangText="*Protected Resource(s):">
+						Data controlled by the Service Provider, which the Consumer can
+						access through authentication.
+					  </t>
+					<t hangText="*Consumer Developer:">
+						An individual or organization that implements a Consumer.
+					  </t>
+					<t hangText="*Consumer Key:">
+						A value used by the Consumer to identify itself to the Service
+						Provider.
+					  </t>
+					<t hangText="*Consumer Secret:">
+						A secret used by the Consumer to establish ownership of the
+						Consumer Key.
+					  </t>
+					<t hangText="*Request Token:">
+						A value used by the Consumer to obtain authorization from the User,
+						and exchanged for an Access Token.
+					  </t>
+					<t hangText="*Access Token:">
+						A value used by the Consumer to gain access to the Protected
+						Resources on behalf of the User, instead of using the User's
+						Service Provider credentials.
+					  </t>
+					<t hangText="*Token Secret:">
+						A secret used by the Consumer to establish ownership of a given
+						Token.
+					  </t>
+				</list>
+			</t>
+			<t>* from <xref target="OAuth"/> Core 1.0 Spec</t>
+		</section>
+		<section title="Multi-Tenant Configuration">
+			<t>
+			  Tenants of the Service Provider must establish the trust through a series of configurations so that the 
+			  Consumer / Tenant and its Users will be able to use this authentication extension.
+		  </t>
+			<section title="Steps" anchor="config_steps">
+				<t>
+					<list style="hanging">
+						<t hangText="Step 1:">
+							Before any Consumer applications can access any Tenant data the Tenant must first enable access to thier data via Service Providers interface.
+						</t>
+						<t hangText="Step 2:">
+							The Tenant must establish a relationship with and 1st, 2nd, or 3rd party applications via Service Providers interface that they want thier Users to be able to use.
+						</t>
+						<t hangText="Step 3:">
+							Users of the Tenant can create / view / delete relationships (Access Tokens) with all Consumer Applications that the Tenant has established a relationship with.
+						</t>
+					</list>
+				</t>
+			</section>
+			<section title="URLs" anchor="oauth_urls">
+				<t>
+				  The Service Provider will supply URLs for the Consumers to use for both normal OAuth implementations and "Trusted" instances.
+				</t>
+				<section title="OAuth URLs">
+					<t>Request Token:</t>
+					<t>	
+					<list style="hanging">
+						<t>[GET] https://tenant.sp.com/v1/Tokens/RequestToken</t>
+						<t>[POST] https://tenant.sp.com/v1/Tokens/RequestToken</t>
+						<t><list>
+								<t>Required header - Content-Length: 0</t>
+						</list></t>
+					</list>
+					</t>
+					<t>User Authorization:</t>
+					<t>
+					<list style="hanging">
+						<t>Redirect User: https://tenant.sp.com/v1/[User Type]/Login</t>
+					</list>
+					</t>
+					<t>Access Token:</t>
+					<t>	
+					<list style="hanging">
+						<t>[GET] https://tenant.sp.com/v1/Tokens/AccessToken</t>
+						<t>[POST] https://tenant.sp.com/v1/Tokens/AccessToken</t>
+							<t>
+							 <list style="hanging">
+								<t> Required header - Content-Length: 0</t>
+							</list>
+						</t>
+					</list>
+					</t>
+					<t>
+						  It is RECOMMENDED that Consumer application use POST when requesting Tokens, however the Service Provider SHOULD support both GET and POST
+					 </t>
+				</section>
+				<section title="Trusted URLs">
+					<t>Access Token:</t>
+					<t>		
+					<list style="hanging">
+						<t>[GET] https://tenant.sp.com/v1/[User Type]/AccessToken</t>
+						<t>[POST] https://tenant.sp.com/v1/[User Type]/AccessToken</t>
+							 <t>
+								 <list style="hanging">
+									<t> Required header - Content-Length: 0</t>
+								</list>
+							</t>
+					</list>
+					</t>
+					<t>
+						  It is RECOMMENDED that Consumer application use POST when requesting Tokens, however the Service Provider SHOULD support both GET and POST
+					 </t>
+				</section>
+			</section>
+		</section>
+		<section title="Authentication Workflow">
+			<section title="Trusted credential based authentication (2nd Party)">
+				<t>
+				<list style="hanging">
+					<t>Consumer Application collects the User's credentials directly</t>
+					<t>Consumer Application concatenates the user name and password with a space 
+				and base64 encodes the credentials</t>
+					<t>Consumer Application puts the encoded credentials in the body of the request 
+				(no parameter assignment, just put the bytes in the request)</t>
+					<t>
+					<list style="hanging">
+						<t> If the consumer is using the accept header value: application/x-www-form-urlencoded then the 
+					 consumer must pass the credentials using the following format</t>
+						<t><figure>
+							<artwork>ec=bXZhc3F1ZXogcGEkJHcwcmQ%3d</artwork>
+						</figure></t>
+						<t><list style="hanging">
+							<t>Credentials must be URL Encoded after they are base64 encoded</t>
+						</list></t>
+					</list></t>
+					<t>Consumer Application posts credentials to the following URI depending on User Type:</t>
+					<t><list style="hanging">
+						<t>This request is signed using <xref target="OAuth"/> signing</t>
+						<t><figure>
+							<artwork>https://tenant.sp.com/v1/[User Type]/AccessToken</artwork>
+						</figure></t>
+					</list></t>
+					<t>The Service Provider will hand the Consumer Application back an Access Token via:</t>
+					<t>Response body:</t>
+					<t><list style="hanging">
+						<t>This request is signed using <xref target="OAuth"/> signing</t>
+						<t><figure>
+							<artwork>ex. oauth_token=afd011d3-fbd3-4c69-8326-a24fad8d0c34&amp;oauth_token_secret=ab86c226-fc65-4d32-a33c-8b54a753655e</artwork>
+						</figure></t>
+					</list></t>
+					<t>Header:</t>
+					<t><figure>
+						<artwork>ex. oauth_token=afd011d3-fbd3-4c69-8326-a24fad8d0c34</artwork>
+					</figure></t>
+					<t><figure>
+						<artwork>oauth_token_secret=ab86c226-fc65-4d32-a33c-8b54a753655e</artwork>
+					</figure></t>
+					<t>The Consumer Application will also get a URI to the User resource via Content-Location header:</t>
+					<t><figure>
+						<artwork>ex. Content-Location=https://tenant.sp.com/v1/People/123</artwork>
+					</figure></t>
+					<t>The Consumer Application will access the User's data using the Access Token and Token Secret</t>
+				</list>
+				</t>
+			</section>
+			<section title="OAuth based authentication (3rd Party)">
+				<t><list style="hanging">
+					<t>Consumer Application requests an unauthenticated Request Token</t>
+					<t><list style="hanging">
+						<t>This request is signed using <xref target="OAuth"/> signing </t>
+						<t>[GET] https://tenant.sp.com/v1/[User Type]/AccessToken</t>
+						<t>[POST] https://tenant.sp.com/v1/[User Type]/AccessToken</t>
+							 <t><list style="hanging">
+								<t> Required header - Content-Length: 0</t>
+							</list></t>
+					</list></t>
+					<t>Service Provider passes back an unauthorized Request Token</t>
+					<t><list style="hanging">
+						<t>Response body:</t>
+						<t><figure>
+							<artwork>ex. oauth_token=afd011d3-fbd3-4c69-8326-a24fad8d0c34&amp;oauth_token_secret=ab86c226-fc65-4d32-a33c-8b54a753655e</artwork>
+						</figure></t>
+					</list></t>
+					<t>Consumer Application requests user authorization via redirect</t>
+					<t><list style="hanging">
+						<t>This request is signed using <xref target="OAuth"/> signing</t>
+						<t><list style="hanging">
+							<t>The Consumer Application will pass the Request Token via url</t>
+							<t><figure>
+								<artwork>ex. https://tenant.sp.com/v1/Tokens/RequestToken?oauth_token=afd011d3-fbd3-4c69-8326-a24fad8d0c34</artwork>
+							</figure></t>
+							<t>The Consumer Application may pass a callback url via url as an OPTIONAL parameter</t>
+							<t><figure>
+								<artwork>ex. https:///tenant.sp.com/v1/Tokens/RequestToken?oauth_token=afd011d3-fbd3-4c69-8326-a24fad8d0c34&amp;oauth_callback=http://www.myconsumerapp.com/home</artwork>
+							</figure></t>
+							<t>User URL: </t>
+							<t><figure>
+								<artwork>ex. https:///tenant.sp.com/v1/[User Type]/Login</artwork>
+							</figure></t>
+						</list></t>
+					</list></t>
+					<t>The User enters thier credentials in using the Service Provider's interface</t>
+					<t>The User will either Accept or Deny the request </t>
+					<t><list style="hanging">
+						<t>If the User allows access then the Service Provider authenticates the Request Token</t>
+						<t><list>
+							<t>If a oauth_callback parameter was provided the Service Provider sends the User back to the Consumer Application</t>
+							<t><figure>
+								<artwork>ex. Redirect http://www.myconsumerapp.com/home?oauthtoken=afd011d3-fbd3-4c69-8326-a24fad8d0c34</artwork>
+							</figure></t>
+							<t>If no oauth_callback parameter was provided the Service Provider sends the User to another page with the authorized Request Token witten in the body</t>
+						</list></t>
+						<t>If the User denies access then the Service Provider marks the Request Token as revoked</t>
+						<t><list>
+							<t>If a oauth_callback parameter was provided the Service Provider sends the User back to the Consumer Application <xref target="OAuthProblemReporting"/>
+							</t>
+							<t><figure>
+								<artwork>ex. Redirect http://www.myconsumerapp.com/home?permissiondenied=The+user+has+denied+access+to+all+protected+resources. </artwork>
+							</figure></t>
+							<t>If no oauth_callback parameter was provided the Service Provider sends the User to another page stating that Request Token has been revoked</t>
+						</list></t>
+					</list></t>
+					<t>The Consumer Application will take the Authorized Request Token and it's corresponding Token Secret and request an Access Token</t>
+					<t><list style="hanging">
+						<t>This request is signed using <xref target="OAuth"/> signing</t>
+						<t><list style="hanging">
+							<t>The Consumer Application will sign the request using the Authenticated Request Token and Token Secret</t>
+							<t>The Consumer Application will pass the Authenticated Request Token via url</t>
+						</list></t>
+						<t>[GET] https://tenant.sp.com/v1/Tokens/AccessToken</t>
+						<t>[POST] https://tenant.sp.com/v1/Tokens/AccessToken</t>
+						<t><list style="hanging">
+							<t>Required header when using the [POST] verb - Content-Length: 0</t>
+						</list></t>
+					</list></t>
+					<t>The Service Provider will hand the Consumer Application back an Access Token via:</t>
+					<t><list style="hanging">
+						<t>Response body:</t>
+						<t><figure>
+							<artwork>ex. oauth_token=afd011d3-fbd3-4c69-8326-a24fad8d0c34&amp;oauth_token_secret=ab86c226-fc65-4d32-a33c-8b54a753655e</artwork>
+						</figure></t>
+						<t>Header:</t>
+						<t><figure>
+							<artwork>oauth_token=afd011d3-fbd3-4c69-8326-a24fad8d0c34 </artwork>
+						</figure></t>
+						<t><figure>
+							<artwork>oauth_token_secret=ab86c226-fc65-4d32-a33c-8b54a753655e</artwork>
+						</figure></t>
+					</list></t>
+					<t>The Consumer Application will also get a URI to the User resource via Content-Location header:</t>
+					<t><figure>
+						<artwork>ex. Content-Location=https://tenant.sp.com/v1/People/123</artwork>
+					</figure></t>
+					<t>The Consumer Application will access the User's data using the Access Token and Token Secret</t>
+				</list></t>
+			</section>
+		</section>
+		<section title="*HTTP Response Codes" anchor="http_codes">
+			<t>
+        This section applies only to the Request Token and Access Token
+        requests. In general, the Service Provider SHOULD use the
+        response codes defined in <xref target="RFC2616"/> Section 10. When
+        the Service Provider rejects a Consumer request, it SHOULD respond with
+        HTTP 400 Bad Request or HTTP 401 Unauthorized.</t>
+
+			<t>
+				<list style="hanging">
+					<t>HTTP 400 Bad Request</t>
+						<t> 
+							<list style="hanging">
+								<t>
+									Unsupported parameter
+								</t>
+								<t>
+									Unsupported signature method
+								</t>
+								<t>
+									Missing required parameter
+								</t>
+								<t>
+									Duplicated OAuth Protocol Parameter
+								</t>
+							</list>
+						</t>
+					<t>HTTP 401 Unauthorized</t>
+					<t>
+						<list style="symbols">
+							<t>
+								Invalid Consumer Key
+							</t>
+							<t>
+								Invalid / expired Token
+							</t>
+							<t>
+								Invalid signature
+							</t>
+							<t>
+								Invalid / used nonce
+							</t>
+						</list>
+					</t>
+				</list>
+			</t>
+			<t>
+			*from <xref target="OAuth"/> Core 1.0 Spec 			
+			</t>
+		</section>
+	</middle>
+	<back>
+		<references title="References">
+			<reference anchor="RFC2606">
+				<front>
+					<title>Reserved Top Level DNS Names</title>
+					<author initials="D.E" surname="Eastlake" fullname="D. Eastlake">
+						<organization/>
+					</author>
+					<author initials="A.P" surname="Panitz" fullname="A. Panitz">
+						<organization/>
+					</author>
+				</front>
+				<seriesInfo name="RFC" value="2606"/>
+			</reference>
+			<reference anchor="RFC2119">
+				<front>
+					<title>
+            Key words for use in RFCs to Indicate Requirement Levels
+          </title>
+					<author initials="B.S" surname="Bradner" fullname="Scott Bradner">
+						<organization>Alis Technologies</organization>
+					</author>
+				</front>
+				<seriesInfo name="RFC" value="2119"/>
+			</reference>
+			<reference anchor="RFC2616">
+				<front>
+					<title>Hypertext Transfer Protocol -- HTTP/1.1</title>
+					<author initials="R.F" surname="Fielding" fullname="R. Fielding">
+						<organization>UC Irvine</organization>
+					</author>
+					<author initials="J.G" surname="Gettys" fullname="J. Gettys">
+						<organization>Compaq/W3C</organization>
+					</author>
+					<author initials="J.M" surname="Mogul" fullname="J. Mogul">
+						<organization>Compaq</organization>
+					</author>
+					<author initials="H.F" surname="Frystyk" fullname="H. Frystyk">
+						<organization>W3C/MIT</organization>
+					</author>
+					<author initials="L.M" surname="Masinter" fullname="L. Masinter">
+						<organization>Xerox</organization>
+					</author>
+					<author initials="P.L" surname="Leach" fullname="P. Leach">
+						<organization>Microsoft</organization>
+					</author>
+					<author initials="T.L" surname="Berners-Lee" fullname="T. Berners-Lee">
+						<organization>W3C/MIT</organization>
+					</author>
+				</front>
+				<seriesInfo name="RFC" value="2616"/>
+			</reference>
+			<reference anchor="RFC2617">
+				<front>
+					<title>
+						HTTP Authentication: Basic and Digest Access Authentication
+					  </title>
+					<author initials="J.F" surname="Franks" fullname="J. Franks">
+						<organization/>
+					</author>
+					<author initials="P.HB" surname="Hallam-Baker" fullname="P. Hallam-Baker">
+						<organization/>
+					</author>
+					<author initials="J.H" surname="Hostetler" fullname="J. Hostetler">
+						<organization/>
+					</author>
+					<author initials="S.L" surname="Lawrence" fullname="S. Lawrence">
+						<organization/>
+					</author>
+					<author initials="P.L" surname="Leach" fullname="P. Leach">
+						<organization/>
+					</author>
+					<author initials="A.L" surname="Luotonen" fullname="A. Luotonen">
+						<organization/>
+					</author>
+					<author initials="L.S" surname="Stewart" fullname="L. Stewart">
+						<organization/>
+					</author>
+				</front>
+				<seriesInfo name="RFC" value="2617"/>
+			</reference>
+			<reference anchor="OAuth">
+				<front>
+					<title>OAuth</title>
+					<author initials="M.A" surname="Atwood" fullname="M. Atwood">
+						<organization/>
+					</author>
+					<author initials="R.C" surname="Conlan" fullname="R. Conlan">
+						<organization/>
+					</author>
+					<author initials="B.C" surname="Cook" fullname="B. Cook">
+						<organization/>
+					</author>
+					<author initials="L.C" surname="Culver" fullname="L. Culver">
+						<organization/>
+					</author>
+					<author initials="K.M" surname="McCrea" fullname="K. McCrea">
+						<organization/>
+					</author>
+					<author initials="L.H" surname="Halff" fullname="L. Halff">
+						<organization/>
+					</author>
+					<author initials="E.H" surname="Hammer" fullname="E. Hammer">
+						<organization/>
+					</author>
+					<author initials="B.L" surname="Laurie" fullname="B. Laurie">
+						<organization/>
+					</author>
+					<author initials="C.M" surname="Messina" fullname="C. Messina">
+						<organization/>
+					</author>
+					<author initials="J.P" surname="Panzer" fullname="J. Panzer">
+						<organization/>
+					</author>
+					<author initials="S.Q" surname="Quigley" fullname="S, Quigley">
+						<organization/>
+					</author>
+					<author initials="D.R" surname="Recordon" fullname="D. Recordon">
+						<organization/>
+					</author>
+					<author initials="E.S" surname="Sandler" fullname="E. Sandler">
+						<organization/>
+					</author>
+					<author initials="J.S" surname="Sergent" fullname="J. Sergent">
+						<organization/>
+					</author>
+					<author initials="T.S" surname="Sieling" fullname="T. Sieling">
+						<organization/>
+					</author>
+					<author initials="B.S" surname="Slesinsky" fullname="B. Slesinsky">
+						<organization/>
+					</author>
+					<author initials="A.S" surname="Smith" fullname="A. Smith">
+						<organization/>
+					</author>
+				</front>
+				<format type="HTML" target="http://oauth.net/core/1.0"/>
+			</reference>
+			<reference anchor="OAuthProblemReporting">
+				<front>
+					<title>OAuth Problem Reporting Extension</title>
+					<author initials="J.K" surname="Kristian" fullname="J. Kristian">
+						<organization/>
+					</author>
+				</front>
+				<format type="HTML" target="http://oauth.pbworks.com/ProblemReporting"/>
+			</reference>
+			<reference anchor="FellowshipOneRESTAPI">
+				<front>
+					<title>Fellowship One REST API</title>
+					<author initials="N.F" surname="Floyd" fullname="N.Floyd">
+						<organization/>
+					</author>
+				</front>
+				<format type="HTML" target="http://developer.fellowshipone.com"/>
+			</reference>
+		</references>
+	</back>
+</rfc>

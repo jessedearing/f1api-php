@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd">
+<?xml-stylesheet type="text/xsl" href="rfc2629.xslt" ?>
+<rfc category="exp" ipr="none" docName="REST_API_OAuth_1_0to1_0a">
+	<?rfc strict="yes" ?>
+	<?rfc toc="yes" ?>
+	<?rfc tocdepth="2" ?>
+	<?rfc symrefs="yes" ?>
+	<?rfc sortrefs="yes" ?>
+	<?rfc compact="yes" ?>
+	<?rfc subcompact="no" ?>
+	<?rfc iprnotified="no" ?>
+	<?rfc private="Implementer Draft" ?>
+	<front>
+		<title>REST API OAuth 1.0 to 1.0a (Draft)</title>
+		<author initials="naf" surname=" OAuth Implementation Changes" fullname="Fellowship One API Group">
+			<organization/>
+			<address>
+				<email>api@fellowshipone.com</email>
+			</address>
+		</author>
+		<date year="2009" month="August"/>
+		<abstract>
+				<t>The API team discussed and decided to research the tasks needed to update our current OAuth lib to support version 1.0a: http://oauth.net/core/1.0a so that consumers can use the new features available in this version of OAuth.</t>
+			<t>
+				This flow is a draft and will change over time. This flow assumes all decision points are green.  Any decisions that result in rejections will loop back into the process
+		  </t>
+		</abstract>
+	</front>
+	<middle>
+		<section title="Authors">
+			<t>
+				<list style="empty">
+					<t>Jas Singh (jsingh@fellowshiptech.com)</t>
+					<t>Nick Floyd (nfloyd@fellowshiptech.com), Editor</t>
+				</list>
+			</t>
+		</section>
+		<section title="Notation and Conventions">
+			<t>
+				The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+				"SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+				document are to be interpreted as described in <xref target="RFC2119"/>.
+				Domain name examples use <xref target="RFC2606"/>.
+			</t>
+		</section>
+		<section title="Definitions">
+			<t>
+				<list style="hanging">
+					<t hangText="oauth_callback_confirmed:">
+							MUST be present and set to true. The Consumer MAY use this to confirm that the Service Provider received the callback value. 
+						</t>
+					<t hangText="oauth_verifier:">
+						The verification code. 
+					  </t>
+					  <t hangText="oauth_callback:">
+						An absolute URL to which the Service Provider will redirect the User back when the Obtaining User Authorization (Obtaining User Authorization) step is completed. If the Consumer is unable to receive callbacks or a callback URL has been established via other means, the parameter value MUST be set to oob (case sensitive), to indicate an out-of-band configuration. 
+					  </t>
+					  <t hangText="Fellowship One REST OAuth Definitions">
+						All definitions from this implementation come from the <xref target="FellowshipOneOAuth"/>. 
+					  </t>
+				</list>
+			</t>
+		</section>
+		<section title="Changes">
+			<t>The following outlines the differences between <xref target="OAuth1_0"/> and <xref target="OAuth1_0a"/>.</t>
+			<section title="Differences" anchor="differences">
+					<t>
+						<list>
+							<t>Section 6.1.1 (Consumer Obtains a Request token)</t>
+							<t><spanx style="verb">ADDED</spanx> oauth_callback </t>
+							<t>
+								<list style="hanging">
+									<t>An absolute URL to which the Service Provider will redirect the User back when the Obtaining User Authorization (Obtaining User Authorization) step is completed. If the Consumer is unable to receive callbacks or a callback URL has been established via other means, the parameter value MUST be set to oob (case sensitive), to indicate an out-of-band configuration. </t>
+								</list>
+							</t>
+							<t>Section 6.1.2 (Service provider Issues an Unauthorized Request Token)</t>
+							<t><spanx style="verb">ADDED</spanx> oauth_callback_confirmed</t>
+							<t>
+								<list style="hanging">
+									<t>MUST be present and set to true. The Consumer MAY use this to confirm that the Service Provider received the callback value.</t>
+								</list>
+							</t>
+							<t>Section 6.2.1 Consumer Directs the User to the Service Provider</t>
+							<t><spanx style="verb">REMOVED</spanx> oauth_callback</t>
+							<t>
+								<list style="hanging">
+									<t>	OPTIONAL. The Consumer MAY specify a URL the Service Provider will use to redirect the User back to the Consumer when Obtaining User Authorization (Obtaining User Authorization) is complete.</t>
+								</list>
+							</t>
+							<t>Section 6.2.3 Service Provider Directs the User Back to the Consumer</t>
+							<t><spanx style="verb">ADDED</spanx> oauth_verifier</t>
+							<t>
+								<list style="hanging">
+									<t>	The verification code. If the Consumer did not provide a callback URL, the Service Provider SHOULD display the value of the verification code, and instruct the User to manually inform the Consumer that authorization is completed.</t>
+								</list>
+							</t>
+							<t>Section 6.3.1 Consumer Requests an Access Token</t>
+							<t><spanx style="verb">ADDED</spanx> oauth_verifier</t>
+							<t>
+								<list style="hanging">
+									<t>	The verification code received from the Service Provider in the Service Provider Directs the User Back to the Consumer (Service Provider Directs the User Back to the Consumer) step. </t>
+								</list>
+							</t>
+							<t>Section 6.3.2 Service Provider Grants an Access Token</t>
+							<t><spanx style="verb">ADDED</spanx> Under "The Service Provider MUST ensure that:"</t>
+							<t>
+								<list style="hanging">
+									<t>The verification code received from the Consumer has been successfully verified.</t>
+								</list>
+							</t>
+						</list>
+					</t>
+			</section>
+		</section>
+		<section title="Current Fellowship One REST API OAuth implementation changes">
+			<section title="2nd Party credentials based authentication basic workflow (No Change)" anchor="2nd">
+				<t>1. Consumer Application collects the User's credentials directly</t>
+				<t>2. Consumer Application concatenates the user name and password with a space and base64 encodes the credentials</t>
+				<t>3. Consumer Application puts the encoded credentials in the body of the request (no parameter assignment, just put the bytes in the request)</t> 
+				<t>
+					<list hangIndent="1">
+						<t>the consumer is using the accept header value: application/x-www-form-urlencoded then the consumer must pass the credentials using the following format </t>
+							<t>
+								<list hangIndent="2">
+									<t>ec=bXZhc3F1ZXogcGEkJHcwcmQ%3d</t>
+									<t>Credentials must be URL Encoded after they are base64 encoded</t>
+								</list>
+							</t>
+					</list> 
+				</t>
+				<t>4. Consumer Application posts them to the following URI depending on what user type your using:</t>
+				<t>
+					<list hangIndent="1">
+						<t>This request is signed using OAuth signing requests</t>
+						<t>Portal User: [POST] https://demo.fellowshiponeapi.com/v1/PortalUser/AccessToken</t>
+						<t>Weblink User: [POST] https://demo.fellowshiponeapi.com/v1/WeblinkUser/AccessToken</t>
+					</list>
+				</t>
+				<t>5. The Service Provider will hand the Consumer Application back an Access Token via: </t>
+				<t>
+					<list hangIndent="1">
+						<t>Response body: ex. oauth_token=afd011d3-fbd3-4c69-8326-a24fad8d0c34&amp;oauth_token_secret=ab86c226-fc65-4d32-a33c-8b54a753655e</t>
+						<t>Header:</t>
+						<t>
+							<list hangIndent="2">
+								<t>oauth_token=afd011d3-fbd3-4c69-8326-a24fad8d0c34</t>
+								<t>oauth_token_secret=ab86c226-fc65-4d32-a33c-8b54a753655e</t>
+							</list>
+						</t>
+					</list>
+				</t>
+				<t>6. The Consumer Application will also get a link to the person via Content-Location header: </t>
+				<t>
+				<list hangIndent="1">
+					<t>
+						 Ex. Content-Location=https://demo.fellowshiponeapi.com/v1/People/123	
+					</t>
+				</list>
+				</t>
+				<t>7. The Consumer Application will access the User's data using the Access Token and Token Secret</t>
+			</section>
+			<section title="3rd Party Oauth 1.0a based authentication basic workflow" anchor="3rd">
+				<t>1. Consumer Application requests an unauthenticated Request Token</t>
+				<t>
+					<list hangIndent="1">
+						<t>This request is signed using OAuth signing requests</t>
+						<t><spanx style="verb">The consumer will pass in the oauth_callback parameter</spanx></t>
+						<t>[GET] https://demo.fellowshiponeapi.com/v1/Tokens/RequestToken</t>
+						<t>[POST] https://demo.fellowshiponeapi.com/v1/Tokens/RequestToken </t>
+						<t>
+							<list hangIndent="2">
+								<t>Required header when using the [POST] verb - Content-Length: 0</t>
+							</list>
+						</t>
+					</list>
+				</t>
+				<t>2. Service Provider passes back an unauthorized Request Token </t>
+				<t>
+					<list hangIndent="1">
+						<t>Response body: ex. oauth_token=afd011d3-fbd3-4c69-8326-a24fad8d0c34&amp;oauth_token_secret=ab86c226-fc65-4d32-a33c-8b54a753655e&amp;<spanx style="verb">oauth_callback_confirmed=true</spanx></t>
+					</list>
+				</t>
+				<t>3. Consumer Application requests user authorization via redirect</t>
+				<t>
+					<list hangIndent="1">
+						<t>This request is signed using OAuth signing requests </t>
+						<t>The oauth_callback parameter is not passed in here</t>
+						<t>
+							<list hangIndent="2">
+								<t>The Consumer Application will sign the request using the Request Token and Token Secret</t>
+								<t>The Consumer Application will pass the Request Token via url </t>
+								<t>
+									<list hangIndent="3">
+										<t>ex. https://demo.fellowshiponeapi.com/v1/PortalUser/Login?oauth_token=afd011d3-fbd3-4c69-8326-a24fad8d0c34</t>
+									</list>
+								</t>
+							</list>
+						</t>
+						<t>
+							<list hangIndent="2">
+								<t>The Consumer Application may pass a callback url via url (optional) </t>
+								<t>
+									<list hangIndent="3">
+										<t>ex. https://demo.fellowshiponeapi.com/v1/PortalUser/Login?oauth_token=afd011d3-fbd3-4c69-8326-a24fad8d0c34&amp;oauth_callback=http://www.myconsumerapp.com/home</t>
+									</list>
+								</t>
+							</list>
+						</t>
+						<t>Portal User: https://demo.fellowshiponeapi.com/v1/PortalUser/Login</t>
+						<t>
+							<list hangIndent="2">
+								<t>User logging in must be linked to a person in the Fellowship One Portal application</t>
+							</list>
+						</t>
+						<t>Weblink User: https://demo.fellowshiponeapi.com/v1/WeblinkUser/Login</t>
+					</list>
+				</t>				
+				<t>4. The User enters their credentials in using the Service Provider's interface</t>
+				<t>5. The User will either Accept or Deny the request</t>
+				<t>
+					<list hangIndent="1">
+						<t>The Service Provider will send back the oauth_verifier parameter to the Consumer Application </t>
+						<t>If the User allows access then the Service Provider authenticates the Request Token</t>
+						<t>
+							<list hangIndent="2">
+								<t><spanx style="verb">Service Provider uses the oauth_callback parameter that was provided to the Service Provider during (Consumer Obtains a Request Token) and sends the User back to the Consumer Application</spanx></t>
+								<t>
+									<list hangIndent="3">
+										<t>ex. Redirect http://www.myconsumerapp.com/home?oauthtoken=afd011d3-fbd3-4c69-8326-a24fad8d0c34&amp;<spanx style="verb">oauth_verifier=hfdp7dh39dks9884</spanx></t>
+									</list>
+								</t>
+								<t><spanx style="verb">If no oauth_callback parameter was provided to the Service Provider during (Consumer Obtains a Request Token) the Service Provider sends the User to another page with the authorized Request Token written in the body with the oauth_verifier parameter</spanx></t>
+							</list>
+						</t>
+						<t> If the User denies access then the Service Provider marks the Request Token as revoked</t>
+						<t>
+							<list hangIndent="2">
+								<t><spanx style="verb">Service Provider uses the oauth_callback parameter that was provided to the Service Provider during (Consumer Obtains a Request Token) and sends the User back to the Consumer Application</spanx></t>
+								<t>
+									<list hangIndent="3">
+										<t>ex. Redirect http://www.myconsumerapp.com/home?permissiondenied=The+user+has+denied+access+to+all+protected+resources. (OAuth problem reporting extension)</t>
+									</list>
+								</t>
+								<t><spanx style="verb">If no oauth_callback parameter was provided to the Service Provider during (Consumer Obtains a Request Token) the Service Provider  sends the User to another page stating that Request Token has been revoked</spanx></t>
+							</list>
+						</t>
+					</list>
+				</t>
+				<t>6. The Consumer Application will take the Authorized Request Token and it's corresponding Token Secret and request an Access Token </t>
+				<t>
+					<list hangIndent="1">
+						<t>This request is signed using OAuth signing requests</t>
+						<t><spanx style="verb">Consumer Application must pass in the oauth_verifier parameter with this request</spanx></t>
+						<t>
+							<list hangIndent="2">
+								<t>The Consumer Application will sign the request using the Authenticated Request Token and Token Secret</t>
+								<t>The Consumer Application will pass the Authenticated Request Token via ur</t>
+							</list>
+						</t>
+						<t>[GET] https://demo.fellowshiponeapi.com/v1/Tokens/AccessToken</t>
+						<t>[POST] https://demo.fellowshiponeapi.com/v1/Tokens/AccessToken</t>
+						<t>
+							<list hangIndent="2">
+								<t>Required header when using the [POST] verb - Content-Length: 0</t>
+							</list>
+						</t>
+					</list>
+				</t>	
+				<t>7. The Service Provider will hand the Consumer Application back an Access Token via: </t>
+				<t>
+					<list hangIndent="1">
+						<t><spanx style="verb">Service Provider will verify the verification code provided by the Consumer</spanx></t>
+						<t>Response body: ex. oauth_token=afd011d3-fbd3-4c69-8326-a24fad8d0c34&amp;oauth_token_secret=ab86c226-fc65-4d32-a33c-8b54a753655e</t>
+						<t>Header:</t>
+						<t>
+							<list hangIndent="2">
+								<t>oauth_token=afd011d3-fbd3-4c69-8326-a24fad8d0c34</t>
+								<t>oauth_token_secret=ab86c226-fc65-4d32-a33c-8b54a753655e</t>
+							</list>
+						</t>
+					</list>
+				</t>			
+				<t>8. The Consumer Application will also get a link to the person via Content-Location header: </t>
+				<t>
+					<list hangIndent="1">
+						<t>ex. Content-Location=https://demo.fellowshiponeapi.com/v1/People/123</t>
+					</list>
+				</t>
+				<t>9. The Consumer Application will access the User's data using the Access Token and Token Secret</t>
+			</section>
+		</section>
+		<section title="Considerations" anchor="Considerations">
+			<t>The oauth_callback parameter will need to be stored with the request_token</t>
+			<t>The oauth_verifier value will need to be stored with the authenticated request_token</t>
+			<t>We will have to label all parameters 1.0 or 1.0a specific or inclusive</t>
+			<t>When 1.0a is used the querystring for oauth_callback will be ignored and the one stored with the request_token will be used</t>
+			<t>The oauth_verifier parameter should be unique and should be stored </t>
+		</section>
+	</middle>
+	<back>
+		<references title="References">
+			<reference anchor="FellowshipOneRESTAPI">
+				<front>
+					<title>Fellowship One REST API</title>
+					<author initials="N.F" surname="Floyd" fullname="N.Floyd">
+						<organization/>
+					</author>
+				</front>
+				<format type="HTML" target="http://developer.fellowshipone.com"/>
+			</reference>
+			<reference anchor="FellowshipOneOAuth">
+				<front>
+					<title>Fellowship One OAuth Implementation</title>
+					<author initials="N.F" surname="Floyd" fullname="N.Floyd">
+						<organization/>
+					</author>
+				</front>
+				<format type="HTML" target="https://demo.fellowshiponeapi.com/v1/Util/AuthDocs.help"/>
+			</reference>
+			<reference anchor="OAuth1_0">
+				<front>
+					<title>OAuth 1.0</title>
+					<author initials="E.H." surname="Hammer" fullname="E.Hammer">
+						<organization/>
+					</author>
+				</front>
+				<format type="HTML" target="http://oauth.net/core/1.0"/>
+			</reference>
+			<reference anchor="OAuth1_0a">
+				<front>
+					<title>OAuth 1.0a</title>
+					<author initials="E.H." surname="Hammer" fullname="E.Hammer">
+						<organization/>
+					</author>
+				</front>
+				<format type="HTML" target="http://oauth.net/core/1.0a"/>
+			</reference>
+			<reference anchor="RFC2606">
+				<front>
+					<title>Reserved Top Level DNS Names</title>
+					<author initials="D.E" surname="Eastlake" fullname="D. Eastlake">
+						<organization/>
+					</author>
+					<author initials="A.P" surname="Panitz" fullname="A. Panitz">
+						<organization/>
+					</author>
+				</front>
+				<seriesInfo name="RFC" value="2606"/>
+			</reference>
+			<reference anchor="RFC2119">
+				<front>
+					<title>
+						Key words for use in RFCs to Indicate Requirement Levels
+				  </title>
+					<author initials="B.S" surname="Bradner" fullname="Scott Bradner">
+						<organization>Alis Technologies</organization>
+					</author>
+				</front>
+				<seriesInfo name="RFC" value="2119"/>
+			</reference>
+		</references>			
+	</back>
+</rfc>

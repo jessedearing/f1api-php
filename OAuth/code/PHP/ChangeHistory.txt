@@ -1,0 +1,23 @@
+Changes between V1 and V2
+-- Add the following methods, just simple getters and setters
+
+public function setConsumerKey($consumerKey) {
+	$this->consumerKey = $consumerKey;
+}
+public function setConsumerSecret($consumerSecret) {
+    $this->consumerSecret = $consumerSecret;
+}
+
+public function setBaseUrl($baseUrl){
+    $this->baseUrl = $baseUrl;
+}
+
+-- Process Response Headers on every call
+Cut the following lines from getAccessToken method
+//register a callback function which will process the response headers
+curl_setopt($this->connection, CURLOPT_HEADERFUNCTION, array(&$this,'readHeader'));
+
+and Paste them in SendRequest (before if( $httpMethod == "POST" || $httpMethod == "PUT") { ) line
+//register a callback function which will process the response headers
+$this->responseHeaders = array();
+curl_setopt($this->connection, CURLOPT_HEADERFUNCTION, array(&$this,'readHeader'));
