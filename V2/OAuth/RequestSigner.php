@@ -50,7 +50,12 @@ class RequestSigner {
         //              file    vacation.jpg
         //              size    original
         $parts = parse_url($url);
-        $qs = $parts['query'];
+				if(isset($parts['query'])) {
+					$qs = $parts['query'];
+				}
+				else {
+					$qs = '';
+				}
         parse_str($qs, $qsArray);
         $signable_options = array_merge($oAuthOptions, $qsArray);
         $signable_parameters = RequestSigner::getNormalizedRequestParameters($signable_options);
