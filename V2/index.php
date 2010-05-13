@@ -5,6 +5,9 @@ require_once 'OAuth\OAuthClient.php';
 $apiConsumer = new OAuthClient(AppConfig::$base_url, AppConfig::$consumer_key, AppConfig::$consumer_secret);
 $data = $apiConsumer->authenticateUser();
 /*********************2nd party authentication**************************/
+
+//comment added for testing push - Isaac
+
 $oauth_token = "";
 $token_secret = "";
 $username = "";
